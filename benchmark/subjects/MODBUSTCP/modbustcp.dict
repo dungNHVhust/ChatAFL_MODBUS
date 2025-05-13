@@ -1,0 +1,29 @@
+# MBAP Header fields
+"\x00\x01"           # Transaction ID (example)
+"\x00\x00"           # Protocol ID (always 0)
+"\x00\x06"           # Length (unitID + PDU)
+"\x01"               # Unit ID
+
+# Function Codes
+"\x01"               # Read Coils
+"\x02"               # Read Discrete Inputs
+"\x03"               # Read Holding Registers
+"\x04"               # Read Input Registers
+"\x05"               # Write Single Coil
+"\x06"               # Write Single Register
+"\x0F"               # Write Multiple Coils
+"\x10"               # Write Multiple Registers
+"\x2B"               # Encapsulated Interface (e.g., read device ID)
+
+# Sample register address & values
+"\x00\x00"           # Address 0x0000
+"\x00\x01"           # Quantity 1
+"\x00\x0A"           # Quantity 10
+"\xFF\x00"           # ON (for Write Coil)
+"\x00\x00"           # OFF (for Write Coil)
+
+# Misc values for LSB/MSB fuzzing
+"\x00"
+"\xFF"
+"\x7F"
+"\x80"
