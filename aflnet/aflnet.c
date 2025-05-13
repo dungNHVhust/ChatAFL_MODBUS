@@ -660,7 +660,7 @@ region_t* extract_requests_http(unsigned char* buf, unsigned int buf_size, unsig
   unsigned int mem_size = 1024;
   unsigned int region_count = 0;
   region_t *regions = NULL;
-  char terminator[4] = {0x0D, 0x0A, 0x0D, 0x0A};
+  char terminator[2] = {0x0D, 0x0A};
 
   mem=(char *)ck_alloc(mem_size);
 
@@ -670,8 +670,8 @@ region_t* extract_requests_http(unsigned char* buf, unsigned int buf_size, unsig
 
     memcpy(&mem[mem_count], buf + byte_count++, 1);
 
-    //Check if the last four bytes are 0x0D0A0D0A
-    if ((mem_count >=4) && (memcmp(&mem[mem_count - 3], terminator, 4) == 0)) {
+    //Check if the last two bytes are 0x0D0A
+    if ((mem_count > 1) && (memcmp(&mem[mem_count - 1], terminator, 2) == 0)) {
       region_count++;
       regions = (region_t *)ck_realloc(regions, region_count * sizeof(region_t));
       regions[region_count - 1].start_byte = cur_start;
@@ -792,6 +792,66 @@ region_t* extract_requests_ipp(unsigned char* buf, unsigned int buf_size, unsign
     region_count = 1;
   }
 
+  *region_count_ref = region_count;
+  return regions;
+}
+
+// modbus is a binary protocol thus there is no need for complicated parsing, just check buf_size
+// command data is not divided in to more regions because user defined function code
+// there is no clear distinction between requests except maximum size
+// so make sure to SPLIT SEED REQUEST TO IT OWN INDIVIDUAL FILE
+region_t* extract_requests_modbustcp(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref)
+{
+  unsigned int region_count = 0;
+  region_t *regions = NULL;
+  
+  // MBAP header + function code
+  if (buf_size >= 8) {
+    region_count = 5;
+    regions = (region_t *)ck_alloc(region_count * sizeof(region_t));
+    for (int count = 0; count < region_count; count++ ) {
+      regions[count].state_sequence = NULL;
+      regions[count].state_count = 0;
+      // MBAP
+      // transaction id, protocol id, length
+      if (count < 3) {
+        regions[count].start_byte = count * 2;
+        regions[count].end_byte = count * 2 + 1;
+      }
+      // unit id
+      else if (count == 3) {
+        regions[count].start_byte = count * 2;
+        regions[count].end_byte = count * 2;
+      }
+      // MBAP end
+      // function code
+      else {
+        regions[count].start_byte = 7;
+        regions[count].end_byte = 7;
+      }
+    }
+    // data
+    if (buf_size > 8) {
+      region_count++;
+      regions = (region_t *)ck_realloc(regions, region_count * sizeof(region_t));
+      regions[region_count - 1].start_byte = 8;
+      // cap at 252
+      regions[region_count - 1].end_byte = (buf_size - 8 <= 252) ? buf_size - 1 : 251 ;
+      regions[region_count - 1].state_sequence = NULL;
+      regions[region_count - 1].state_count = 0;
+    }
+  }
+  else {
+    // malformed, put all in one region
+    if (buf_size > 0) {
+      region_count = 1;
+      regions = (region_t *)ck_alloc(sizeof(region_t));
+      regions[0].start_byte = 0;
+      regions[0].end_byte = buf_size - 1;
+      regions[0].state_sequence = NULL;
+      regions[0].state_count = 0;
+    }
+  }
   *region_count_ref = region_count;
   return regions;
 }
@@ -1498,6 +1558,39 @@ unsigned int* extract_response_codes_ipp(unsigned char* buf, unsigned int buf_si
   }
 
   if (mem) ck_free(mem);
+  *state_count_ref = state_count;
+  return state_sequence;
+}
+
+// same as extract request, just check buf_size
+unsigned int* extract_response_codes_modbustcp(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref)
+{
+  unsigned int *state_sequence = NULL;
+  unsigned int state_count = 0;
+
+  state_count++;
+  state_sequence = (unsigned int *)ck_realloc(state_sequence, state_count * sizeof(unsigned int));
+  state_sequence[state_count - 1] = 0;
+
+  // error code should combine with function code for better differentiation
+  // if received code >127 then combine function code with exception code
+  // else return function code, might not work well with user defined function
+  if (buf_size >= 8) {
+    unsigned int message_code;
+    if (buf[7] >= 128) {
+      message_code = buf[7] - 128;
+      if (buf_size > 8) {
+        // combine error function code with at most 3 more byte
+        unsigned int len = (buf_size - 8 > 3) ? 3 : buf_size - 8;
+        memcpy((char *) &message_code + 1, &buf[7], len);
+      }
+    }
+    else message_code = buf[7];
+    state_count++;
+    state_sequence = (unsigned int *)ck_realloc(state_sequence, state_count * sizeof(unsigned int));
+    state_sequence[state_count - 1] = message_code;
+  }
+  
   *state_count_ref = state_count;
   return state_sequence;
 }

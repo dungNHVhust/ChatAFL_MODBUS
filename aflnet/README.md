@@ -28,7 +28,7 @@ year={2020},}
 # Install clang (as required by AFL/AFLNet to enable llvm_mode)
 sudo apt-get install clang
 # Install graphviz development
-sudo apt-get install graphviz-dev libcap-dev
+sudo apt-get install graphviz-dev
 ```
 
 ## AFLNet
@@ -68,8 +68,6 @@ AFLNet adds the following options to AFL. Run ```afl-fuzz --help``` to see all o
 - ***-P protocol***: application protocol to be tested (e.g., RTSP, FTP, DTLS12, DNS, DICOM, SMTP, SSH, TLS, DAAP-HTTP, SIP)
 
 - ***-D usec***: (optional) waiting time (in microseconds) for the server to complete its initialization 
-
-- ***-e netnsname***: (optional) network namespace name to run the server in
 
 - ***-K*** : (optional) send SIGTERM signal to gracefully terminate the server after consuming all request messages
 
