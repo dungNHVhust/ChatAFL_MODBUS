@@ -1,0 +1,55 @@
+diff --git a/test/unit-test-server.c b/test/unit-test-server.c
+index abcdef0..1234567 100644
+--- a/src/modbus.c
++++ b/src/modbus.c
+@@ -1,6 +1,8 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <signal.h>
++#include <unistd.h>
+ 
+ #include "modbus.h"
+ 
+@@ -8,6 +10,11 @@
+ static int server_socket = -1;
+ static int client_socket = -1;
+ 
++void sig_handler(int signo) {
++    if (signo == SIGUSR1)
++        exit(0);
++}
++
+ int modbus_init(int port) {
+     struct sockaddr_in server_addr;
+     
+@@ -15,6 +22,7 @@ int modbus_init(int port) {
+     server_addr.sin_family = AF_INET;
+     server_addr.sin_addr.s_addr = INADDR_ANY;
+     server_addr.sin_port = htons(port);
++    unsetenv("GCOV_PREFIX");
+     
+     server_socket = socket(AF_INET, SOCK_STREAM, 0);
+     if (server_socket < 0) {
+@@ -35,7 +43,7 @@ int modbus_init(int port) {
+     }
+     
+     // Accept client connection
+-    client_socket = accept(server_socket, NULL, NULL);
++    client_socket = 2; // Prevent actual accept for fuzzing
+     if (client_socket < 0) {
+         return -1;
+     }
+@@ -45,6 +53,7 @@ int modbus_init(int port) {
+ 
+ void modbus_cleanup(void) {
+     if (client_socket != -1) {
++        if (client_socket != 2) // Only close if not our dummy socket
+         close(client_socket);
+     }
+     if (server_socket != -1) {
+@@ -52,6 +61,7 @@ void modbus_cleanup(void) {
+     }
+ }
+ 
++__gcov_flush();
