@@ -25,7 +25,7 @@ if $(strstr $FUZZER "afl") || $(strstr $FUZZER "llm"); then
   #Step-1. Do Fuzzing
   #Move to fuzzing folder
   cd $WORKDIR/${TARGET_DIR}/       #Diff 2
-  timeout -k 2s --preserve-status $TIMEOUT /home/ubuntu/${FUZZER}/afl-fuzz -d -i ${INPUTS} -x ${WORKDIR}/modbustcp.dict -o $OUTDIR -N tcp://127.0.0.1/1502 $OPTIONS ./modbus_server 1502
+  timeout -k 2s --preserve-status $TIMEOUT /home/ubuntu/${FUZZER}/afl-fuzz -d -m none -i ${INPUTS} -x ${WORKDIR}/modbustcp.dict -o $OUTDIR -N tcp://127.0.0.1/1502 $OPTIONS -D 10000 -q 3 -s 3 -R -K ${WORKDIR}/libmodbus/test/unit-test-server 1502
 
   STATUS=$?
 
