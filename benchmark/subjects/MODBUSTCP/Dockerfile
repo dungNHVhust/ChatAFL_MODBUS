@@ -97,18 +97,19 @@ RUN cd $WORKDIR && \
 # Install libmodbus with gcov support
 
 # Download and compile libmodbus for coverage analysis
-# RUN cd $WORKDIR && \
-#     git clone https://github.com/stephane/libmodbus.git libmodbus-gcov && \
-#     cd libmodbus-gcov && \
-#     git checkout f9fe3b0 && \
-#     patch -p1 < /tmp/gcov.patch && \
-#     ./autogen.sh &&\
-#     CFLAGS="-fprofile-arcs -ftest-coverage" \
-#     CPPFLAGS="-fprofile-arcs -ftest-coverage" \
-#     CXXFLAGS="-fprofile-arcs -ftest-coverage" \
-#     LDFLAGS="-fprofile-arcs -ftest-coverage" \
-#     ./configure --enable-static --disable-shared && \
-#     make clean all
+RUN cd $WORKDIR && \
+    rm -rf libmodbus-gcov && \
+    git clone https://github.com/stephane/libmodbus.git libmodbus-gcov && \
+    cd libmodbus-gcov && \
+    git checkout f9fe3b0 && \
+    patch -p1 < /tmp/gcov.patch && \
+    ./autogen.sh && \
+    CFLAGS="-fprofile-arcs -ftest-coverage" \
+    CPPFLAGS="-fprofile-arcs -ftest-coverage" \
+    CXXFLAGS="-fprofile-arcs -ftest-coverage" \
+    LDFLAGS="-fprofile-arcs -ftest-coverage" \
+    ./configure --enable-static --disable-shared && \
+    make clean all $MAKE_OPT
 
 
 COPY --chown=ubuntu:ubuntu in-modbustcp ${WORKDIR}/in-modbustcp
