@@ -23,9 +23,9 @@
 # cd subjects/SMTP/Exim
 # docker build . -t exim --build-arg MAKE_OPT $NO_CACHE
 
-cd $PFBENCH
-cd subjects/RTSP/Live555
-docker build . -t live555 --build-arg MAKE_OPT $NO_CACHE
+# cd $PFBENCH
+# cd subjects/RTSP/Live555
+# docker build . -t live555 --build-arg MAKE_OPT $NO_CACHE
 
 # cd $PFBENCH
 # cd subjects/SIP/Kamailio

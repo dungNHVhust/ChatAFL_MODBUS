@@ -26,6 +26,20 @@ for subject in ./benchmark/subjects/*/*; do
   cp -r ChatAFL-CL2 $subject/chatafl-cl2
 done;
 
+#Copy the different versions of ChatAFL to MODBUSTCP 
+
+rm -r ./benchmark/subjects/MODBUSTCP/aflnet 2>&1 >/dev/null
+cp -r aflnet ./benchmark/subjects/MODBUSTCP/aflnet
+
+rm -r ./benchmark/subjects/MODBUSTCP/chatafl 2>&1 >/dev/null
+cp -r ChatAFL ./benchmark/subjects/MODBUSTCP/chatafl
+  
+rm -r ./benchmark/subjects/MODBUSTCP/chatafl-cl1 2>&1 >/dev/null
+cp -r ChatAFL-CL1 ./benchmark/subjects/MODBUSTCP/chatafl-cl1
+  
+rm -r ./benchmark/subjects/MODBUSTCP/chatafl-cl2 2>&1 >/dev/null
+cp -r ChatAFL-CL2 ./benchmark/subjects/MODBUSTCP/chatafl-cl2
+
 # Build the docker images
 
 PFBENCH="$PWD/benchmark"
