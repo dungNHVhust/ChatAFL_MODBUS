@@ -271,6 +271,34 @@ do
             fi
 
         fi
+##### MODBUSTCP ####
+        if [[ $TARGET == "modbustcp" ]] || [[ $TARGET == "all" ]]
+        then
+
+            cd $PFBENCH
+            mkdir results-modbustcp
+
+            if [[ $FUZZER == "aflnet" ]] || [[ $FUZZER == "all" ]]
+            then
+                profuzzbench_exec_common.sh modbustcp $NUM_CONTAINERS results-modbustcp aflnet out-modbustcp-aflnet "-m none -P MODBUSTCP -N tcp://127.0.0.1/1502 -D 50000 -q 3 -s 3 -R -K -t ${TEST_TIMEOUT}+" $TIMEOUT $SKIPCOUNT &
+            fi
+            
+            if [[ $FUZZER == "chatafl" ]] || [[ $FUZZER == "all" ]]
+            then
+                profuzzbench_exec_common.sh modbustcp $NUM_CONTAINERS results-modbustcp chatafl out-modbustcp-chatafl "-m none -P MODBUSTCP -N tcp://127.0.0.1/1502 -D 50000 -q 3 -s 3 -R -K -t ${TEST_TIMEOUT}+" $TIMEOUT $SKIPCOUNT  &
+            fi
+
+            if [[ $FUZZER == "chatafl-cl1" ]] || [[ $FUZZER == "all" ]]
+            then
+                profuzzbench_exec_common.sh modbustcp $NUM_CONTAINERS results-modbustcp chatafl-cl1 out-modbustcp-chatafl_cl1 "-m none -P MODBUSTCP -N tcp://127.0.0.1/1502 -D 50000 -q 3 -s 3 -R -K -t ${TEST_TIMEOUT}+" $TIMEOUT $SKIPCOUNT &
+            fi
+
+            if [[ $FUZZER == "chatafl-cl2" ]] || [[ $FUZZER == "all" ]]
+            then
+                profuzzbench_exec_common.sh modbustcp $NUM_CONTAINERS results-modbustcp chatafl-cl2 out-modbustcp-chatafl_cl2 "-m none -P MODBUSTCP -N tcp://127.0.0.1/1502 -D 50000 -q 3 -s 3 -R -K -t ${TEST_TIMEOUT}+" $TIMEOUT $SKIPCOUNT &
+            fi
+
+        fi
 
 ##### HTTP #####
 
